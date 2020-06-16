@@ -73,11 +73,11 @@ router.post('/', [ auth, [
     if (instagram) profileFields.social.instagram = instagram;
 
     try {
-        let profile = await Profile.findOne({ _id: req.user.id });
+        let profile = await Profile.findOne({ user: req.user.id });
         console.log('in update', profile);
         if (profile) {
             // Update
-            profile = await Profile.findByIdAndUpdate(
+            profile = await Profile.findOneAndUpdate(
                 { user: req.user.id },
                 { $set: profileFields },
                 {new: true}
