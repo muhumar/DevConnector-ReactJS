@@ -6,6 +6,7 @@ const { check, validationResult } = require('express-validator');
 const auth = require('../../middleware/auth');
 const Profile = require('../../models/Profile');
 const User = require('../../models/User');
+const Post = require('../../models/Post');
 
 router.get('/me', auth, async (req, res) => {
     try {
@@ -99,7 +100,7 @@ router.post('/', [ auth, [
 
 router.get('/', async (req, res) => {
     try {
-        const profiles = await Profile.find().populate('User', ['name', 'avatar']);
+        const profiles = await Profile.find().populate('user', ['name', 'avatar']);
         res.json(profiles);
     } catch (err) {
         console.log(err.message);
@@ -110,7 +111,7 @@ router.get('/', async (req, res) => {
 
 router.get('/user/:user_id', async (req, res) => {
     try {
-        const profile = await Profile.findOne({ user: req.params.user_id }).populate('User', ['name', 'avatar']);
+        const profile = await Profile.findOne({ user: req.params.user_id }).populate('user', ['name', 'avatar']);
         
         if (!profile) {
             return res.status(400).json({ msg: 'There is no profile for this user.' });
@@ -129,6 +130,8 @@ router.get('/user/:user_id', async (req, res) => {
 
 router.delete('/', auth, async (req, res) => {
     try {
+        await Post.deleteMany({ user: req.user.id });
+
         await Profile.findOneAndRemove({ user: req.user.id });
 
         await User.findByIdAndRemove({ _id: req.user.id });
